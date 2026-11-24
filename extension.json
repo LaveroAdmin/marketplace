@@ -1,0 +1,62 @@
+{
+    "name": "laveroadmin/marketplace",
+    "title": {
+        "en": "Extensions Marketplace",
+        "ru": "Маркетплейс расширений"
+    },
+    "description": {
+        "en": "Visual catalog, installer, updater and lifecycle manager for LaveroAdmin extensions.",
+        "ru": "Визуальный каталог, установка, обновление и управление жизненным циклом расширений."
+    },
+    "category": "system",
+    "icon": "icon-store",
+    "version": "1.0.0",
+    "author": {
+        "name": "Aleksandr Kireev",
+        "email": "hello@bespredel.name",
+        "url": "https://bespredel.name"
+    },
+    "github": "https://github.com/LaveroAdmin/marketplace",
+    "setup": {
+        "commands": [
+            {
+                "cmd": "php artisan admin:import marketplace",
+                "desc": {
+                    "en": "Import marketplace admin menu and permissions",
+                    "ru": "Импорт меню и прав доступа маркетплейса"
+                }
+            }
+        ],
+        "config": {
+            "file": "config/admin.php",
+            "code": "'marketplace' => [\n    'enable' => true,\n],"
+        },
+        "requirements": {
+            "en": [
+                "PHP >= 8.1",
+                "Composer binary available in system PATH or composer.phar in project root"
+            ],
+            "ru": [
+                "PHP >= 8.1",
+                "Доступный исполняемый файл composer в PATH или composer.phar в корне проекта"
+            ]
+        },
+        "notes": {
+            "en": [
+                "Web installation requires process execution permissions (proc_open/exec)."
+            ],
+            "ru": [
+                "Для автоматической установки пакетов через веб-интерфейс требуются права на выполнение команд процессами (proc_open/exec)."
+            ]
+        }
+    },
+    "key": "marketplace",
+    "compatibility": {
+        "php": ">=8.1",
+        "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+        "admin": "^1.0",
+        "extensions": [
+            "pdo"
+        ]
+    }
+}
