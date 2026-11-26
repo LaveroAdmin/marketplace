@@ -1,7 +1,7 @@
 {
     "name": "LaveroAdmin Official Repository",
     "version": "1.0.0",
-    "updated_at": "2026-11-26T05:43:38Z",
+    "updated_at": "2026-11-26T11:11:44+03:00",
     "packages": [
         {
             "name": "laveroadmin/activity-log",
@@ -1471,5 +1471,1475 @@
                 ]
             }
         }
-    ]
+    ],
+    "extensions": {
+        "activity-log": {
+            "name": "laveroadmin/activity-log",
+            "title": {
+                "en": "Activity Log & Audit",
+                "ru": "Журнал активности и аудит"
+            },
+            "description": {
+                "en": "Track user activity and model attribute diffs powered by Spatie Activitylog.",
+                "ru": "Журналирование действий пользователей и аудит изменений моделей на базе Spatie Activitylog."
+            },
+            "category": "security",
+            "icon": "icon-history",
+            "version": "1.0.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/activity-log",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan vendor:publish --provider=\"Spatie\\Activitylog\\ActivitylogServiceProvider\" --tag=\"activitylog-migrations\"",
+                        "desc": {
+                            "en": "Publish activity_log database migrations",
+                            "ru": "Публикация миграций таблицы activity_log"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Run database migrations",
+                            "ru": "Применение миграций"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import activity-log",
+                        "desc": {
+                            "en": "Import admin menu item and permissions",
+                            "ru": "Импорт пункта меню журнала активности"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'activity-log' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Add the Spatie\\Activitylog\\Traits\\LogsActivity trait to Eloquent models you wish to track.",
+                        "Implement getActivitylogOptions(): LogOptions in your tracked models."
+                    ],
+                    "ru": [
+                        "Подключите trait Spatie\\Activitylog\\Traits\\LogsActivity в Eloquent модели, изменения которых вы хотите отслеживать.",
+                        "В моделях определите метод getActivitylogOptions(): LogOptions."
+                    ]
+                }
+            },
+            "key": "activity-log",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "backup": {
+            "name": "laveroadmin/backup",
+            "title": {
+                "en": "Backup Manager",
+                "ru": "Менеджер бэкапов"
+            },
+            "description": {
+                "en": "Manage database and file backups with multi-disk support powered by Spatie Backup.",
+                "ru": "Управление резервными копиями базы данных и файлов с поддержкой Spatie Backup."
+            },
+            "category": "system",
+            "icon": "icon-copy",
+            "version": "1.0.1",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/backup",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan vendor:publish --provider=\"Spatie\\Backup\\BackupServiceProvider\"",
+                        "desc": {
+                            "en": "Publish Spatie Backup configuration file (config/backup.php)",
+                            "ru": "Публикация конфигурационного файла Spatie Backup (config/backup.php)"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import backup",
+                        "desc": {
+                            "en": "Import admin menu item and permissions",
+                            "ru": "Импорт пункта меню и прав доступа в панель управления"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'backup' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1",
+                        "mysqldump or sqlite3 utility in system PATH for database dumps"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1",
+                        "Утилиты mysqldump или sqlite3 в PATH для создания дампов баз данных"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Configure destination disks in config/backup.php (e.g., local, s3, backup).",
+                        "To run backups automatically, add to routes/console.php: Schedule::command('backup:run')->daily();"
+                    ],
+                    "ru": [
+                        "Настройте диски назначения в файле config/backup.php (например, local, s3, backup).",
+                        "Для регулярных бэкапов добавьте в routes/console.php: Schedule::command('backup:run')->daily();"
+                    ]
+                }
+            },
+            "key": "backup",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo",
+                    "zip"
+                ]
+            }
+        },
+        "cache-manager": {
+            "name": "laveroadmin/cache-manager",
+            "title": {
+                "en": "Cache & System Optimizer",
+                "ru": "Кэш и оптимизация"
+            },
+            "description": {
+                "en": "Clear/warm Laravel caches, flush OPcache, and run storage:link from the admin panel without SSH.",
+                "ru": "Очистка и прогрев кэша Laravel, сброс OPcache и создание storage:link из админки без SSH."
+            },
+            "category": "system",
+            "icon": "icon-bolt",
+            "version": "1.0.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/cache-manager",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan admin:import cache-manager",
+                        "desc": {
+                            "en": "Import Cache Manager menu and permissions",
+                            "ru": "Импорт меню и прав доступа"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'cache-manager' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Runs Artisan::call() directly in PHP without proc_open/exec, ideal for shared hosting."
+                    ],
+                    "ru": [
+                        "Выполняет Artisan::call() напрямую в PHP без proc_open/exec — идеально для обычного хостинга."
+                    ]
+                }
+            },
+            "key": "cache-manager",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "ckeditor": {
+            "name": "laveroadmin/ckeditor",
+            "title": {
+                "en": "CKEditor 5",
+                "ru": "Редактор CKEditor 5"
+            },
+            "description": {
+                "en": "Rich WYSIWYG text editor integration for Model-Form textarea fields.",
+                "ru": "Интеграция визуального WYSIWYG редактора CKEditor 5 в поля Model-Form."
+            },
+            "category": "content",
+            "icon": "icon-pencil-alt",
+            "version": "1.1.1",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/ckeditor",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan admin:import ckeditor",
+                        "desc": {
+                            "en": "Publish CKEditor 5 JavaScript and CSS assets",
+                            "ru": "Публикация JS/CSS бандла редактора CKEditor 5"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'ckeditor' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Use in your form: $form->ckeditor('content')->options(['height' => 400]);"
+                    ],
+                    "ru": [
+                        "Используйте в форме: $form->ckeditor('content')->options(['height' => 400]);"
+                    ]
+                }
+            },
+            "key": "ckeditor",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": []
+            }
+        },
+        "config": {
+            "name": "laveroadmin/config",
+            "title": {
+                "en": "Config Manager",
+                "ru": "Менеджер конфигураций"
+            },
+            "description": {
+                "en": "Manage dynamic application settings stored in database and cached in runtime.",
+                "ru": "Управление динамическими параметрами конфигурации приложения с сохранением в базе данных."
+            },
+            "category": "tools",
+            "icon": "icon-toggle-on",
+            "version": "1.1.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/config",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create and update the admin_config database table",
+                            "ru": "Создание и обновление таблицы admin_config в базе данных"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import config",
+                        "desc": {
+                            "en": "Import settings menu item and permissions",
+                            "ru": "Импорт пункта меню и прав доступа конфигураций"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'config' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "To load stored settings into Laravel config at boot, call \\LaveroAdmin\\Admin\\Config\\Config::load() in your AppServiceProvider::boot() method (guarded with Schema::hasTable).",
+                        "Example: if (Schema::hasTable(config('admin.extensions.config.table', 'admin_config'))) { \\LaveroAdmin\\Admin\\Config\\Config::load(); }"
+                    ],
+                    "ru": [
+                        "Для загрузки сохранённых параметров в config() при старте приложения вызовите \\LaveroAdmin\\Admin\\Config\\Config::load() в методе AppServiceProvider::boot() (с проверкой Schema::hasTable).",
+                        "Пример: if (Schema::hasTable(config('admin.extensions.config.table', 'admin_config'))) { \\LaveroAdmin\\Admin\\Config\\Config::load(); }"
+                    ]
+                }
+            },
+            "key": "config",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "forms": {
+            "name": "laveroadmin/forms",
+            "title": {
+                "en": "Forms & Leads",
+                "ru": "Формы и заявки"
+            },
+            "description": {
+                "en": "Build public contact/lead forms and manage submissions with statuses and notes.",
+                "ru": "Конструктор публичных форм сайта и входящие заявки со статусами и заметками."
+            },
+            "category": "content",
+            "icon": "icon-inbox",
+            "version": "1.0.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/forms",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create web_forms and web_form_submissions tables",
+                            "ru": "Создание таблиц web_forms и web_form_submissions"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import forms",
+                        "desc": {
+                            "en": "Import Forms & Leads menu and permissions",
+                            "ru": "Импорт меню и прав доступа"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'forms' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Public submission endpoint: POST /forms/{slug}/submit (honeypot supported)."
+                    ],
+                    "ru": [
+                        "Публичный обработчик: POST /forms/{slug}/submit (поддерживается honeypot-защита)."
+                    ]
+                }
+            },
+            "key": "forms",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "grid-sortable": {
+            "name": "laveroadmin/grid-sortable",
+            "title": {
+                "en": "Grid Sortable",
+                "ru": "Сортировка строк грида"
+            },
+            "description": {
+                "en": "Drag-and-drop row reordering for Eloquent Model-Grid tables.",
+                "ru": "Drag-and-drop перетаскивание и сортировка строк в таблицах Model-Grid."
+            },
+            "category": "tools",
+            "icon": "icon-arrows-alt-v",
+            "version": "1.0.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/grid-sortable",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan admin:import grid-sortable",
+                        "desc": {
+                            "en": "Publish sorting JS and CSS assets",
+                            "ru": "Публикация JS и CSS скриптов сортировки"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'grid-sortable' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1",
+                        "An 'order' integer column in the target database table"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1",
+                        "Поле 'order' (или аналогичное integer) в таблице модели"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "The model must implement Spatie\\EloquentSortable\\Sortable and use the SortableTrait.",
+                        "In your Grid controller: $grid->sortable();"
+                    ],
+                    "ru": [
+                        "Модель должна реализовывать Spatie\\EloquentSortable\\Sortable и использовать trait Spatie\\EloquentSortable\\SortableTrait.",
+                        "В контроллере грида вызовите: $grid->sortable();"
+                    ]
+                }
+            },
+            "key": "grid-sortable",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": []
+            }
+        },
+        "helpers": {
+            "name": "laveroadmin/helpers",
+            "title": {
+                "en": "Development Helpers",
+                "ru": "Помощники разработки"
+            },
+            "description": {
+                "en": "Scaffolding tools, CRUD controller & model generator, and database schema inspector.",
+                "ru": "Инструменты кодогенерации, генератор CRUD-контроллеров, моделей и инспектор таблиц БД."
+            },
+            "category": "tools",
+            "icon": "icon-cogs",
+            "version": "1.0.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/helpers",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan admin:import helpers",
+                        "desc": {
+                            "en": "Import scaffolding menu items and routes",
+                            "ru": "Импорт меню и маршрутов скаффолдинга"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'helpers' => [\n    'enable' => env('APP_ENV') === 'local',\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Recommended to enable only in local development environments (APP_ENV=local)."
+                    ],
+                    "ru": [
+                        "Рекомендуется включать только в локальном dev-окружении (APP_ENV=local)."
+                    ]
+                }
+            },
+            "key": "helpers",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "log-viewer": {
+            "name": "laveroadmin/log-viewer",
+            "title": {
+                "en": "Log Viewer",
+                "ru": "Просмотр логов"
+            },
+            "description": {
+                "en": "Real-time viewer for Laravel log files with level filters, search, and download.",
+                "ru": "Просмотр журналов логов Laravel в реальном времени с фильтрацией по уровням и поиском."
+            },
+            "category": "system",
+            "icon": "icon-database",
+            "version": "1.0.1",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/log-viewer",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan admin:import log-viewer",
+                        "desc": {
+                            "en": "Import log viewer menu item",
+                            "ru": "Импорт пункта меню журнала логов"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'log-viewer' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Reads log files from storage/logs/*.log."
+                    ],
+                    "ru": [
+                        "Читает файлы из папки storage/logs/*.log."
+                    ]
+                }
+            },
+            "key": "log-viewer",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "mail-log": {
+            "name": "laveroadmin/mail-log",
+            "title": {
+                "en": "Mail Log",
+                "ru": "Журнал писем"
+            },
+            "description": {
+                "en": "Log and preview outgoing Laravel emails with sensitive token redaction.",
+                "ru": "Журнал и предпросмотр исходящих писем Laravel с маскированием токенов."
+            },
+            "category": "tools",
+            "icon": "icon-envelope",
+            "version": "1.0.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/mail-log",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create mail_logs table",
+                            "ru": "Создание таблицы mail_logs"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import mail-log",
+                        "desc": {
+                            "en": "Import Mail Log menu and permissions",
+                            "ru": "Импорт меню и прав доступа"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'mail-log' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Automatically listens to Illuminate\\Mail\\Events\\MessageSent."
+                    ],
+                    "ru": [
+                        "Автоматически перехватывает Illuminate\\Mail\\Events\\MessageSent."
+                    ]
+                }
+            },
+            "key": "mail-log",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "marketplace": {
+            "name": "laveroadmin/marketplace",
+            "title": {
+                "en": "Extensions Marketplace",
+                "ru": "Маркетплейс расширений"
+            },
+            "description": {
+                "en": "Visual catalog, installer, updater and lifecycle manager for LaveroAdmin extensions.",
+                "ru": "Визуальный каталог, установка, обновление и управление жизненным циклом расширений."
+            },
+            "category": "system",
+            "icon": "icon-store",
+            "version": "1.0.3",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/marketplace",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan admin:import marketplace",
+                        "desc": {
+                            "en": "Import marketplace admin menu and permissions",
+                            "ru": "Импорт меню и прав доступа маркетплейса"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'marketplace' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1",
+                        "ext-zip (for shared hosting ZIP install/update) or Composer CLI + proc_open"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1",
+                        "Расширение PHP zip (для установки/обновления без Composer) или Composer CLI + proc_open"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Supports both Composer CLI (on VPS/local) and pure-PHP ZIP archive installation/updates (on shared hosting without proc_open/exec).",
+                        "Extensions installed via ZIP are stored in storage/app/lavero-extensions and loaded automatically on boot; you can also upload .zip archives directly from the Marketplace UI."
+                    ],
+                    "ru": [
+                        "Поддерживает как установку/обновление через Composer CLI (на VPS и локально), так и через ZIP-архивы на чистом PHP (для обычного хостинга без proc_open/exec).",
+                        "Расширения, установленные через ZIP, сохраняются в storage/app/lavero-extensions и подключаются автоматически; также поддерживается ручная загрузка .zip архивов из интерфейса маркетплейса."
+                    ]
+                }
+            },
+            "key": "marketplace",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "media-manager": {
+            "name": "laveroadmin/media-manager",
+            "title": {
+                "en": "Media Manager",
+                "ru": "Медиа менеджер"
+            },
+            "description": {
+                "en": "Visual file and media browser for configured Laravel storage disks.",
+                "ru": "Визуальный файловый менеджер и проводник медиафайлов для дисков хранилища Laravel."
+            },
+            "category": "content",
+            "icon": "icon-file",
+            "version": "1.0.1",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/media-manager",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan storage:link",
+                        "desc": {
+                            "en": "Create symbolic link for public storage",
+                            "ru": "Создание символической ссылки на публичное хранилище"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import media-manager",
+                        "desc": {
+                            "en": "Import media manager menu item",
+                            "ru": "Импорт меню медиа менеджера"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'media-manager' => [\n    'enable' => true,\n    'disk' => 'public',\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "The 'disk' parameter defines the active disk from config/filesystems.php."
+                    ],
+                    "ru": [
+                        "Параметр 'disk' определяет активный диск из config/filesystems.php."
+                    ]
+                }
+            },
+            "key": "media-manager",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "fileinfo"
+                ]
+            }
+        },
+        "menus": {
+            "name": "laveroadmin/menus",
+            "title": {
+                "en": "Site Menus Builder",
+                "ru": "Конструктор меню сайта"
+            },
+            "description": {
+                "en": "Build and manage public site navigation menus (header, footer, sidebar) with drag-and-drop hierarchy and permanent caching.",
+                "ru": "Управление меню публичного сайта (шапка, подвал, сайдбар) с drag-and-drop иерархией и постоянным кэшированием."
+            },
+            "category": "content",
+            "icon": "icon-bars",
+            "version": "1.0.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/menus",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create site_menus and site_menu_items tables",
+                            "ru": "Создание таблиц site_menus и site_menu_items"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import menus",
+                        "desc": {
+                            "en": "Import Site Menus admin menu and permissions",
+                            "ru": "Импорт пункта меню и прав доступа"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "resources/views/layouts/app.blade.php",
+                    "code": "@foreach(site_menu('header') as $item)\n    <a href=\"{{ $item['url'] }}\" target=\"{{ $item['target'] }}\">{{ $item['title'] }}</a>\n@endforeach"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Use site_menu('header') in Blade templates to retrieve the nested menu tree (cached forever until updated)."
+                    ],
+                    "ru": [
+                        "Используйте хелпер site_menu('header') в Blade-шаблонах для получения дерева меню (кэшируется до изменения)."
+                    ]
+                }
+            },
+            "key": "menus",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "notifications": {
+            "name": "laveroadmin/notifications",
+            "title": {
+                "en": "Notifications (Telegram / Webhook / Email)",
+                "ru": "Уведомления (Telegram / Webhook / Email)"
+            },
+            "description": {
+                "en": "Send alerts to Telegram, Email, or Webhooks on WAFU blocks, exceptions, backups, and custom events.",
+                "ru": "Отправка уведомлений в Telegram, Email и Webhook при событиях WAFU, ошибках, бэкапах и др."
+            },
+            "category": "tools",
+            "icon": "icon-bell",
+            "version": "1.0.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/notifications",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create notification_channels and notification_logs tables",
+                            "ru": "Создание таблиц notification_channels и notification_logs"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import notifications",
+                        "desc": {
+                            "en": "Import Notifications menu and permissions",
+                            "ru": "Импорт меню и прав доступа"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'notifications' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Call \\LaveroAdmin\\Admin\\Notifications\\NotificationService::dispatch('wafu.block', 'Title', 'Body') anywhere in your app."
+                    ],
+                    "ru": [
+                        "Вызывайте \\LaveroAdmin\\Admin\\Notifications\\NotificationService::dispatch('wafu.block', 'Заголовок', 'Текст') в любом месте приложения."
+                    ]
+                }
+            },
+            "key": "notifications",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "queue-manager": {
+            "name": "laveroadmin/queue-manager",
+            "title": {
+                "en": "Queue Manager",
+                "ru": "Менеджер очередей"
+            },
+            "description": {
+                "en": "Monitor queues, retry or delete failed jobs, and inspect batches in real time.",
+                "ru": "Мониторинг очередей, перезапуск и удаление упавших задач, отслеживание батчей в реальном времени."
+            },
+            "category": "system",
+            "icon": "icon-tasks",
+            "version": "1.0.2",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/queue-manager",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan queue:failed-table && php artisan queue:batches-table",
+                        "desc": {
+                            "en": "Generate migrations for failed_jobs and job_batches tables",
+                            "ru": "Создание миграций для таблиц failed_jobs и job_batches"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Run database migrations",
+                            "ru": "Выполнение миграций базы данных"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import queue-manager",
+                        "desc": {
+                            "en": "Import admin menu item and permissions",
+                            "ru": "Импорт пункта меню и прав доступа"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'queue-manager' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1",
+                        "Configured queue driver (QUEUE_CONNECTION=database or redis in .env)"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1",
+                        "Настроенный драйвер очередей (QUEUE_CONNECTION=database или redis в .env)"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Start a queue worker: php artisan queue:work.",
+                        "The 'Restart workers' button executes php artisan queue:restart."
+                    ],
+                    "ru": [
+                        "Запустите воркер очередей: php artisan queue:work.",
+                        "Кнопка 'Перезапустить воркеры' выполняет php artisan queue:restart."
+                    ]
+                }
+            },
+            "key": "queue-manager",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "reporter": {
+            "name": "laveroadmin/reporter",
+            "title": {
+                "en": "Exception Reporter",
+                "ru": "Репортер исключений"
+            },
+            "description": {
+                "en": "Catch, store, and inspect uncaught application exceptions with call traces and request details.",
+                "ru": "Автоматическая фиксация и трекинг непойманных исключений с трассировкой и метаданными запроса."
+            },
+            "category": "system",
+            "icon": "icon-bug",
+            "version": "1.0.2",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/reporter",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create the laravel_exceptions database table",
+                            "ru": "Создание таблицы laravel_exceptions в базе данных"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import reporter",
+                        "desc": {
+                            "en": "Import exception reporting menu item and permissions",
+                            "ru": "Импорт пункта меню и прав доступа отчётов об ошибках"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'reporter' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "To report exceptions, add to your exception handler (bootstrap/app.php or app/Exceptions/Handler.php):",
+                        "\\LaveroAdmin\\Admin\\Reporter\\Reporter::report($exception);"
+                    ],
+                    "ru": [
+                        "Для сохранения ошибок добавьте в обработчик исключений (bootstrap/app.php или app/Exceptions/Handler.php):",
+                        "\\LaveroAdmin\\Admin\\Reporter\\Reporter::report($exception);"
+                    ]
+                }
+            },
+            "key": "reporter",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "scheduling": {
+            "name": "laveroadmin/scheduling",
+            "title": {
+                "en": "Task Scheduling",
+                "ru": "Планировщик задач"
+            },
+            "description": {
+                "en": "Manage Laravel scheduled tasks, trigger manual runs, and inspect crontab execution history.",
+                "ru": "Управление расписанием cron-задач Laravel, ручной запуск и просмотр истории выполнения."
+            },
+            "category": "tools",
+            "icon": "icon-clock",
+            "version": "1.0.1",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/scheduling",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan admin:import scheduling",
+                        "desc": {
+                            "en": "Import task scheduling menu item and permissions",
+                            "ru": "Импорт меню и прав доступа"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'scheduling' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1",
+                        "System cron scheduler running on server"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1",
+                        "Настроенный cron на сервере"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Add the Laravel scheduler call to your server crontab:",
+                        "* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1"
+                    ],
+                    "ru": [
+                        "Добавьте вызов планировщика в системный crontab сервера:",
+                        "* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1"
+                    ]
+                }
+            },
+            "key": "scheduling",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "seo": {
+            "name": "laveroadmin/seo",
+            "title": {
+                "en": "SEO & Redirects",
+                "ru": "SEO и редиректы"
+            },
+            "description": {
+                "en": "Manage 301/302/410 redirects with hit tracking, robots.txt editor, and global SEO meta tags.",
+                "ru": "Управление 301/302/410 редиректами со счётчиком переходов, редактор robots.txt и глобальные SEO-теги."
+            },
+            "category": "tools",
+            "icon": "icon-search",
+            "version": "1.0.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/seo",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create seo_redirects table",
+                            "ru": "Создание таблицы seo_redirects"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import seo",
+                        "desc": {
+                            "en": "Import SEO menu items and permissions",
+                            "ru": "Импорт пунктов меню и прав доступа SEO"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "bootstrap/app.php",
+                    "code": "->withMiddleware(function (Middleware $middleware) {\n    $middleware->web(append: [\n        \\LaveroAdmin\\Admin\\Seo\\Middleware\\RedirectMiddleware::class,\n    ]);\n})"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Attach \\LaveroAdmin\\Admin\\Seo\\Middleware\\RedirectMiddleware to your web middleware group to handle active redirects automatically.",
+                        "Redirects are cached permanently via Cache::rememberForever and refreshed on save/delete."
+                    ],
+                    "ru": [
+                        "Подключите middleware \\LaveroAdmin\\Admin\\Seo\\Middleware\\RedirectMiddleware в группу 'web' для автоматической обработки редиректов.",
+                        "Редиректы кэшируются бессрочно через Cache::rememberForever и обновляются при изменении."
+                    ]
+                }
+            },
+            "key": "seo",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "sessions": {
+            "name": "laveroadmin/sessions",
+            "title": {
+                "en": "Sessions & Login Audit",
+                "ru": "Сессии и аудит входов"
+            },
+            "description": {
+                "en": "View active admin sessions, revoke sessions remotely, and inspect login history.",
+                "ru": "Просмотр активных сессий администраторов, принудительный выход и история входов."
+            },
+            "category": "security",
+            "icon": "icon-user-shield",
+            "version": "1.0.0",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/sessions",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create admin_login_logs table",
+                            "ru": "Создание таблицы admin_login_logs"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import sessions",
+                        "desc": {
+                            "en": "Import Sessions & Audit menu and permissions",
+                            "ru": "Импорт меню и прав доступа"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'sessions' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Automatically logs admin login/logout/failed events. Database session driver enables remote session revocation."
+                    ],
+                    "ru": [
+                        "Автоматически фиксирует входы и неудачные попытки. При SESSION_DRIVER=database доступен удалённый сброс сессий."
+                    ]
+                }
+            },
+            "key": "sessions",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "tiptap": {
+            "name": "laveroadmin/tiptap",
+            "title": {
+                "en": "TipTap Editor",
+                "ru": "Редактор TipTap"
+            },
+            "description": {
+                "en": "Modern headless TipTap WYSIWYG editor field for LaveroAdmin.",
+                "ru": "Современный WYSIWYG-редактор TipTap для форм LaveroAdmin."
+            },
+            "category": "content",
+            "icon": "icon-edit",
+            "version": "1.0.1",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/tiptap",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan admin:import tiptap",
+                        "desc": {
+                            "en": "Register TipTap form field",
+                            "ru": "Регистрация поля TipTap"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'tiptap' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Use in your form: $form->tiptap('content');"
+                    ],
+                    "ru": [
+                        "Используйте в форме: $form->tiptap('content');"
+                    ]
+                }
+            },
+            "key": "tiptap",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        },
+        "translations": {
+            "name": "laveroadmin/translations",
+            "title": {
+                "en": "Translation Manager",
+                "ru": "Менеджер переводов"
+            },
+            "description": {
+                "en": "Side-by-side localization editor for PHP and JSON lang files with missing keys detection.",
+                "ru": "Двухколоночный редактор файлов локализации PHP и JSON с подсветкой отсутствующих ключей."
+            },
+            "category": "content",
+            "icon": "icon-language",
+            "version": "1.0.2",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/translations",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan admin:import translations",
+                        "desc": {
+                            "en": "Import admin menu item and permissions",
+                            "ru": "Импорт меню и прав доступа"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "config/admin.php",
+                    "code": "'translations' => [\n    'enable' => true,\n],"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1",
+                        "Write permissions to the project lang/ directory"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1",
+                        "Права на запись в директорию lang/ проекта"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Translation files are read from lang/{locale}/*.php and lang/{locale}.json.",
+                        "Changes are written directly back to disk upon saving."
+                    ],
+                    "ru": [
+                        "Файлы переводов читаются из lang/{locale}/*.php и JSON-файлов lang/{locale}.json.",
+                        "При сохранении переводы автоматически синхронизируются на диске."
+                    ]
+                }
+            },
+            "key": "translations",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "json",
+                    "mbstring"
+                ]
+            }
+        },
+        "wafu": {
+            "name": "laveroadmin/wafu",
+            "title": {
+                "en": "WAFU Firewall",
+                "ru": "Фаервол WAFU"
+            },
+            "description": {
+                "en": "Web application firewall, attack filtering rules, IP blacklists, and security event logs.",
+                "ru": "Веб-фаервол, правила фильтрации атак, черные списки IP-адресов и аудит безопасности."
+            },
+            "category": "security",
+            "icon": "icon-shield-alt",
+            "version": "1.0.2",
+            "author": {
+                "name": "Aleksandr Kireev",
+                "email": "hello@bespredel.name",
+                "url": "https://bespredel.name"
+            },
+            "github": "https://github.com/LaveroAdmin/wafu",
+            "setup": {
+                "commands": [
+                    {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create WAFU events, blocks, and settings tables",
+                            "ru": "Создание таблиц событий, блокировок и настроек WAFU"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan vendor:publish --tag=wafu-config",
+                        "desc": {
+                            "en": "Publish base WAFU firewall config (config/wafu.php)",
+                            "ru": "Публикация базового конфига фаервола (config/wafu.php)"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan admin:import wafu",
+                        "desc": {
+                            "en": "Import firewall menu items and permissions",
+                            "ru": "Импорт пунктов меню и прав доступа фаервола"
+                        }
+                    }
+                ],
+                "config": {
+                    "file": "bootstrap/app.php",
+                    "code": "->withMiddleware(function (Middleware $middleware) {\n    $middleware->web(append: [\n        \\LaveroAdmin\\Admin\\Wafu\\Middleware\\WafuFirewallMiddleware::class,\n    ]);\n})"
+                },
+                "requirements": {
+                    "en": [
+                        "PHP >= 8.1",
+                        "bespredel/wafu"
+                    ],
+                    "ru": [
+                        "PHP >= 8.1",
+                        "bespredel/wafu"
+                    ]
+                },
+                "notes": {
+                    "en": [
+                        "Attach \\LaveroAdmin\\Admin\\Wafu\\Middleware\\WafuFirewallMiddleware (or alias 'wafu.firewall') to your web middleware group in bootstrap/app.php.",
+                        "Password fields and CSRF tokens are automatically excluded from WAF inspection and redacted as [REDACTED] in event logs.",
+                        "All WAF settings, IP whitelists, route exclusions, and module rules are managed from Admin -> WAF Firewall -> WAF Settings and cached until changed."
+                    ],
+                    "ru": [
+                        "Подключите middleware \\LaveroAdmin\\Admin\\Wafu\\Middleware\\WafuFirewallMiddleware (или алиас 'wafu.firewall') в группу 'web' в bootstrap/app.php.",
+                        "Поля паролей и CSRF-токены автоматически исключаются из проверки WAF и маскируются как [REDACTED] в журнале событий.",
+                        "Все настройки WAF, белые списки IP, исключения маршрутов и правила модулей управляются из админки (WAF Фаервол -> Настройки WAF) и кэшируются до изменения."
+                    ]
+                }
+            },
+            "key": "wafu",
+            "compatibility": {
+                "php": ">=8.1",
+                "laravel": "^10.0 || ^11.0 || ^12.0 || ^13.0",
+                "admin": "^1.0",
+                "extensions": [
+                    "pdo"
+                ]
+            }
+        }
+    }
 }

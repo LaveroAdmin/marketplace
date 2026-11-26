@@ -284,6 +284,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('admin.close') }}"></button>
             </div>
             <div class="modal-body">
+                <div class="alert alert-success d-none align-items-start gap-2 py-2 px-3 mb-3 small" id="inst-auto-status-alert">
+                    <i class="icon-check-circle mt-1"></i>
+                    <div>
+                        <div class="fw-semibold">{{ trans('lavero-admin-marketplace::marketplace.inst_auto_installed_hint') }}</div>
+                        <div class="mt-1 text-success-emphasis d-none" id="inst-ready-to-use-note">{{ trans('lavero-admin-marketplace::marketplace.inst_ready_to_use') }}</div>
+                    </div>
+                </div>
                 <!-- Author & Repository Header Card -->
                 <div class="card bg-light border-0 mb-3" id="inst-section-author">
                     <div class="card-body py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
@@ -747,18 +754,40 @@
             instSecRequirements.style.display = 'none';
         }
 
-        // 3. Commands
+        // 0. Auto-installed status banner
+        const autoAlert = document.getElementById('inst-auto-status-alert');
+        const readyNote = document.getElementById('inst-ready-to-use-note');
         const rawCommands = setup.commands || [];
+        const hasManualCmd = rawCommands.some(c => {
+            const s = (typeof c === 'string') ? c : (c.cmd || '');
+            return !/^php artisan (migrate|admin:import\b)/i.test(s.trim());
+        });
+        if (autoAlert) {
+            if (item.installed) {
+                autoAlert.classList.remove('d-none');
+                autoAlert.classList.add('d-flex');
+                if (readyNote) {
+                    readyNote.classList.toggle('d-none', hasManualCmd || !!setup.config);
+                }
+            } else {
+                autoAlert.classList.add('d-none');
+                autoAlert.classList.remove('d-flex');
+            }
+        }
+
+        // 3. Commands
         if (rawCommands.length > 0) {
             instCommandsContainer.innerHTML = '';
             rawCommands.forEach((c, idx) => {
                 const cmdStr = (typeof c === 'string') ? c : (c.cmd || '');
                 const descStr = (typeof c === 'object' && c.desc) ? c.desc : '';
+                const isAutoDone = item.installed && /^php artisan (migrate|admin:import\b)/i.test(cmdStr.trim());
+                const autoBadge = isAutoDone ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 ms-2">{{ trans('lavero-admin-marketplace::marketplace.auto_done_badge') }}</span>` : '';
 
                 const wrap = document.createElement('div');
                 wrap.className = 'cmd-item-box';
                 wrap.innerHTML = `
-                    ${descStr ? `<div class="small fw-semibold text-secondary mb-1">${descStr}</div>` : ''}
+                    ${(descStr || isAutoDone) ? `<div class="small fw-semibold text-secondary mb-1 d-flex align-items-center">${descStr}${autoBadge}</div>` : ''}
                     <div class="position-relative">
                         <pre class="console-terminal mb-0 py-2" id="cmd-pre-${idx}">${cmdStr}</pre>
                         <button type="button" class="btn btn-sm btn-outline-light position-absolute top-0 end-0 m-1 py-0 px-2 btn-copy-inline" data-text="${cmdStr}">

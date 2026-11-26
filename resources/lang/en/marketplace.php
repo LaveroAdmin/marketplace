@@ -81,4 +81,7 @@ return [
     'upload_invalid_file' => 'Please select a valid .zip extension archive.',
     'update_available' => 'Update available',
     'update_to' => 'Update to :version',
+    'auto_done_badge' => 'Done automatically',
+    'inst_auto_installed_hint' => 'Installed via Marketplace: database migrations (migrate) and menu/permissions import (admin:import) were already executed automatically. Below are only optional/manual integration steps if applicable.',
+    'inst_ready_to_use' => 'Ready to use immediately — no extra configuration or publishing required.',
 ];
