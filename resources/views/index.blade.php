@@ -490,11 +490,13 @@
     const btnTerminalOpenInst = document.getElementById('btn-terminal-open-instructions');
 
     let lastInstalledKey = null;
+    let pendingInstructionsKey = null;
 
     function executeAction(action, key) {
         if (!modalTerminal) return;
 
         lastInstalledKey = (action === 'install') ? key : null;
+        pendingInstructionsKey = null;
         terminalBox.textContent = `Starting ${action} for ${key}...\nPlease wait, this may take a few moments.\n`;
         terminalSpinner.style.display = 'flex';
         terminalStatus.textContent = `Executing ${action}...`;
@@ -512,7 +514,19 @@
                     }
                     modalTerminalEl.addEventListener('hidden.bs.modal', function onHide() {
                         modalTerminalEl.removeEventListener('hidden.bs.modal', onHide);
-                        admin.ajax.reload();
+                        if (pendingInstructionsKey) {
+                            const keyToOpen = pendingInstructionsKey;
+                            pendingInstructionsKey = null;
+                            if (modalInstEl) {
+                                modalInstEl.addEventListener('hidden.bs.modal', function onInstHide() {
+                                    modalInstEl.removeEventListener('hidden.bs.modal', onInstHide);
+                                    admin.ajax.reload();
+                                });
+                            }
+                            showInstructions(keyToOpen);
+                        } else {
+                            admin.ajax.reload();
+                        }
                     });
                 } else {
                     admin.toastr.error(res.data.message);
@@ -809,8 +823,13 @@
     if (btnTerminalOpenInst) {
         btnTerminalOpenInst.addEventListener('click', function () {
             if (lastInstalledKey) {
-                if (modalTerminal) modalTerminal.hide();
-                setTimeout(() => showInstructions(lastInstalledKey), 400);
+                pendingInstructionsKey = lastInstalledKey;
+                if (modalTerminal) {
+                    modalTerminal.hide();
+                } else {
+                    showInstructions(pendingInstructionsKey);
+                    pendingInstructionsKey = null;
+                }
             }
         });
     }
