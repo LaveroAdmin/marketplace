@@ -113,6 +113,7 @@ class MarketplaceService
 
         foreach ($aggregated as $key => $meta) {
             $packageName = $meta['name'] ?? '';
+            $remoteVersion = (string) ($meta['version'] ?? '1.0.0');
 
             // 1. Try to load local or vendor extension.json manifest for latest local info
             $localManifest = $this->loadManifest($key, $packageName);
@@ -125,20 +126,31 @@ class MarketplaceService
 
             // 3. Installed status & installed version
             $isInstalled = false;
-            $version = $meta['version'] ?? '1.0.0';
+            $version = $meta['version'] ?? $remoteVersion;
+            $installedViaZip = LocalExtensionLoader::isLocallyInstalled($key);
 
-            if (class_exists(InstalledVersions::class)) {
+            if ($installedViaZip) {
+                $isInstalled = true;
+                $zipManifest = LocalExtensionLoader::getManifest($key);
+                if (!empty($zipManifest['version'])) {
+                    $version = (string) $zipManifest['version'];
+                }
+            } elseif (class_exists(InstalledVersions::class)) {
                 if (!empty($packageName) && InstalledVersions::isInstalled($packageName)) {
                     $isInstalled = true;
                     $version = InstalledVersions::getPrettyVersion($packageName) ?: $version;
                 } elseif (InstalledVersions::isInstalled("laveroadmin/{$key}")) {
                     $isInstalled = true;
                     $version = InstalledVersions::getPrettyVersion("laveroadmin/{$key}") ?: $version;
-                } elseif (InstalledVersions::isInstalled("laveroadmin/{$key}")) {
-                    $isInstalled = true;
-                    $version = InstalledVersions::getPrettyVersion("laveroadmin/{$key}") ?: $version;
                 }
             }
+
+            $cleanInstalled = ltrim((string) $version, 'vV');
+            $cleanRemote = ltrim($remoteVersion, 'vV');
+            $hasUpdate = $isInstalled
+                && preg_match('/^\d+\.\d+/', $cleanInstalled)
+                && preg_match('/^\d+\.\d+/', $cleanRemote)
+                && version_compare($cleanRemote, $cleanInstalled, '>');
 
             // 4. Enabled status in admin
             $isEnabled = array_key_exists($key, Admin::$extensions)
@@ -149,12 +161,14 @@ class MarketplaceService
             $compatCheck = $this->compatibilityChecker->check($meta['compatibility'] ?? [], $locale);
 
             $items[$key] = array_merge($meta, [
-                'key'           => $key,
-                'installed'     => $isInstalled,
-                'version'       => $version,
-                'enabled'       => $isEnabled,
-                'compatibility' => $compatCheck,
-                'has_update'    => false,
+                'key'            => $key,
+                'installed'      => $isInstalled,
+                'version'        => $version,
+                'latest_version' => $remoteVersion,
+                'enabled'        => $isEnabled,
+                'compatibility'  => $compatCheck,
+                'has_update'     => $hasUpdate,
+                'install_driver' => $installedViaZip ? 'zip' : ($this->canUseComposer() ? 'composer' : 'zip'),
             ]);
         }
 
@@ -312,6 +326,7 @@ class MarketplaceService
     protected function loadManifest(string $key, string $packageName): ?array
     {
         $candidatePaths = [
+            LocalExtensionLoader::storagePath($key) . '/extension.json',
             base_path("vendor/{$packageName}/extension.json"),
             base_path("../../packages/lavero-admin/extensions/{$key}/extension.json"),
             dirname(__DIR__, 4) . "/extensions/{$key}/extension.json",
@@ -351,18 +366,25 @@ class MarketplaceService
         $meta = $extensions[$key];
         $packageName = $meta['name'];
         $baseDir = base_path();
+        $installedViaZip = LocalExtensionLoader::isLocallyInstalled($key);
+        $useComposer = $this->canUseComposer() && !$installedViaZip;
 
-        $composerBin = $this->findComposerBinary();
         $output = '';
 
         try {
             switch ($action) {
                 case 'install':
-                    $cmd = [$composerBin, 'require', $packageName];
+                    if (!$useComposer) {
+                        return $this->installOrUpdateViaZip($key, $meta, 'install');
+                    }
+
+                    $cmd = array_merge($this->findComposerCommand(), ['require', $packageName]);
                     $res = $this->executeCommand($cmd, $baseDir);
                     $output .= $res['output'] . PHP_EOL;
 
                     if ($res['exit_code'] === 0) {
+                        Artisan::call('migrate', ['--force' => true]);
+                        $output .= PHP_EOL . '--- Artisan migrate ---' . PHP_EOL . Artisan::output();
                         Artisan::call('admin:import', ['extension' => $key]);
                         $output .= PHP_EOL . "--- Artisan admin:import {$key} ---" . PHP_EOL . Artisan::output();
                         return ['status' => true, 'message' => "Extension {$packageName} installed successfully.", 'output' => $output];
@@ -370,11 +392,17 @@ class MarketplaceService
                     return ['status' => false, 'message' => "Composer require failed with code {$res['exit_code']}", 'output' => $output];
 
                 case 'update':
-                    $cmd = [$composerBin, 'update', $packageName];
+                    if (!$useComposer) {
+                        return $this->installOrUpdateViaZip($key, $meta, 'update');
+                    }
+
+                    $cmd = array_merge($this->findComposerCommand(), ['update', $packageName]);
                     $res = $this->executeCommand($cmd, $baseDir);
                     $output .= $res['output'] . PHP_EOL;
 
                     if ($res['exit_code'] === 0) {
+                        Artisan::call('migrate', ['--force' => true]);
+                        $output .= PHP_EOL . '--- Artisan migrate ---' . PHP_EOL . Artisan::output();
                         Artisan::call('admin:import', ['extension' => $key]);
                         $output .= PHP_EOL . "--- Artisan admin:import {$key} ---" . PHP_EOL . Artisan::output();
                         return ['status' => true, 'message' => "Extension {$packageName} updated successfully.", 'output' => $output];
@@ -382,12 +410,28 @@ class MarketplaceService
                     return ['status' => false, 'message' => "Composer update failed with code {$res['exit_code']}", 'output' => $output];
 
                 case 'import':
+                    Artisan::call('migrate', ['--force' => true]);
+                    $output .= '--- Artisan migrate ---' . PHP_EOL . Artisan::output();
                     Artisan::call('admin:import', ['extension' => $key]);
-                    $artisanOut = Artisan::output();
-                    return ['status' => true, 'message' => "Assets & settings imported for {$key}.", 'output' => $artisanOut];
+                    $output .= PHP_EOL . Artisan::output();
+                    return ['status' => true, 'message' => "Assets & settings imported for {$key}.", 'output' => $output];
 
                 case 'remove':
-                    $cmd = [$composerBin, 'remove', $packageName];
+                    if ($installedViaZip) {
+                        $targetDir = LocalExtensionLoader::storagePath($key);
+                        $this->deleteDirectory($targetDir);
+                        return ['status' => true, 'message' => "Extension {$packageName} removed from local storage.", 'output' => "Removed directory: {$targetDir}"];
+                    }
+
+                    if (!$this->canUseComposer()) {
+                        return [
+                            'status'  => false,
+                            'message' => 'Composer CLI / proc_open is unavailable on this hosting. Remove the package via composer.json.',
+                            'output'  => '',
+                        ];
+                    }
+
+                    $cmd = array_merge($this->findComposerCommand(), ['remove', $packageName]);
                     $res = $this->executeCommand($cmd, $baseDir);
                     $output .= $res['output'];
 
@@ -402,6 +446,244 @@ class MarketplaceService
         } catch (\Throwable $e) {
             return ['status' => false, 'message' => $e->getMessage(), 'output' => $e->getTraceAsString()];
         }
+    }
+
+    /**
+     * Download and install/update an extension from its ZIP archive (shared-hosting friendly, no Composer/proc_open).
+     */
+    public function installOrUpdateViaZip(string $key, array $meta, string $action = 'install'): array
+    {
+        if (!class_exists(\ZipArchive::class)) {
+            return [
+                'status'  => false,
+                'message' => 'PHP ZipArchive extension is required for ZIP installation.',
+                'output'  => '',
+            ];
+        }
+
+        $urls = $this->resolveZipUrls($meta);
+        if (empty($urls)) {
+            return [
+                'status'  => false,
+                'message' => "No download URL or GitHub repository found for {$key}.",
+                'output'  => '',
+            ];
+        }
+
+        $tmpZip = tempnam(sys_get_temp_dir(), 'lavero_ext_');
+        if ($tmpZip === false) {
+            return ['status' => false, 'message' => 'Failed to create temporary file.', 'output' => ''];
+        }
+
+        $downloadedFrom = null;
+        $log = "Shared-hosting ZIP mode ({$action})\n";
+
+        try {
+            foreach ($urls as $url) {
+                $log .= "Downloading: {$url}\n";
+                $response = Http::timeout(60)->withOptions(['sink' => $tmpZip])->get($url);
+                if ($response->successful() && filesize($tmpZip) > 0) {
+                    $downloadedFrom = $url;
+                    break;
+                }
+            }
+
+            if ($downloadedFrom === null) {
+                @unlink($tmpZip);
+                return [
+                    'status'  => false,
+                    'message' => 'Failed to download extension archive.',
+                    'output'  => $log,
+                ];
+            }
+
+            $result = $this->installFromZipFile($tmpZip, $key);
+            $result['output'] = $log . ($result['output'] ?? '');
+
+            return $result;
+        } finally {
+            if (file_exists($tmpZip)) {
+                @unlink($tmpZip);
+            }
+        }
+    }
+
+    /**
+     * Extract an extension ZIP archive into storage/app/lavero-extensions/{key},
+     * register its autoloader/provider, and run migrations + admin:import.
+     */
+    public function installFromZipFile(string $zipPath, ?string $expectedKey = null): array
+    {
+        if (!class_exists(\ZipArchive::class)) {
+            return ['status' => false, 'message' => 'PHP ZipArchive extension is not enabled.', 'output' => ''];
+        }
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath) !== true) {
+            return ['status' => false, 'message' => 'Could not open ZIP archive.', 'output' => ''];
+        }
+
+        $tmpExtract = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'lavero_ext_extract_' . uniqid();
+        @mkdir($tmpExtract, 0755, true);
+
+        try {
+            if (!$zip->extractTo($tmpExtract)) {
+                $zip->close();
+                return ['status' => false, 'message' => 'Failed to extract ZIP archive.', 'output' => ''];
+            }
+            $zip->close();
+
+            // Detect single top-level directory (e.g. GitHub Repo-master/)
+            $entries = array_values(array_diff(scandir($tmpExtract) ?: [], ['.', '..']));
+            $sourceDir = $tmpExtract;
+            if (count($entries) === 1 && is_dir($tmpExtract . DIRECTORY_SEPARATOR . $entries[0])) {
+                $sourceDir = $tmpExtract . DIRECTORY_SEPARATOR . $entries[0];
+            }
+
+            $manifest = [];
+            if (file_exists($sourceDir . '/extension.json')) {
+                $manifest = json_decode((string) @file_get_contents($sourceDir . '/extension.json'), true) ?: [];
+            }
+
+            $composer = [];
+            if (file_exists($sourceDir . '/composer.json')) {
+                $composer = json_decode((string) @file_get_contents($sourceDir . '/composer.json'), true) ?: [];
+            }
+
+            $key = $expectedKey
+                ?: ($manifest['key'] ?? null)
+                ?: Str::afterLast(Str::afterLast((string) ($composer['name'] ?? ''), '/'), 'lavero-admin-');
+
+            $key = preg_replace('/[^a-zA-Z0-9_-]/', '', (string) $key);
+            if ($key === '') {
+                return [
+                    'status'  => false,
+                    'message' => 'Invalid extension archive: missing extension.json or composer.json.',
+                    'output'  => '',
+                ];
+            }
+
+            $baseStorage = LocalExtensionLoader::storagePath();
+            if (!is_dir($baseStorage)) {
+                @mkdir($baseStorage, 0755, true);
+            }
+
+            $targetDir = LocalExtensionLoader::storagePath($key);
+            if (is_dir($targetDir)) {
+                $this->deleteDirectory($targetDir);
+            }
+
+            $this->copyDirectory($sourceDir, $targetDir);
+
+            // Register autoloader and service provider immediately for Artisan commands
+            LocalExtensionLoader::registerExtension(app(), $targetDir);
+
+            $output = "Extracted to: {$targetDir}\n";
+
+            try {
+                Artisan::call('migrate', ['--force' => true]);
+                $output .= "\n--- Artisan migrate ---\n" . Artisan::output();
+            } catch (\Throwable $e) {
+                $output .= "\n--- Artisan migrate warning: {$e->getMessage()} ---\n";
+            }
+
+            try {
+                Artisan::call('admin:import', ['extension' => $key]);
+                $output .= "\n--- Artisan admin:import {$key} ---\n" . Artisan::output();
+            } catch (\Throwable $e) {
+                $output .= "\n--- Artisan admin:import warning: {$e->getMessage()} ---\n";
+            }
+
+            $version = $manifest['version'] ?? '';
+
+            return [
+                'status'  => true,
+                'message' => "Extension [{$key}]" . ($version ? " (v{$version})" : '') . ' installed/updated successfully.',
+                'output'  => $output,
+                'key'     => $key,
+            ];
+        } finally {
+            $this->deleteDirectory($tmpExtract);
+        }
+    }
+
+    protected function resolveZipUrls(array $meta): array
+    {
+        $urls = [];
+        foreach (['zip_url', 'download_url'] as $field) {
+            if (!empty($meta[$field]) && is_string($meta[$field])) {
+                $urls[] = $meta[$field];
+            }
+        }
+
+        if (!empty($meta['github']) && is_string($meta['github'])) {
+            $github = rtrim($meta['github'], '/');
+            $urls[] = "{$github}/archive/refs/heads/master.zip";
+            $urls[] = "{$github}/archive/refs/heads/main.zip";
+        }
+
+        return array_values(array_unique($urls));
+    }
+
+    protected function canUseComposer(): bool
+    {
+        if (!function_exists('proc_open')) {
+            return false;
+        }
+
+        $disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+        if (in_array('proc_open', $disabled, true)) {
+            return false;
+        }
+
+        if (file_exists(base_path('composer.phar'))) {
+            return true;
+        }
+
+        try {
+            $res = $this->executeCommand(['composer', '--version'], base_path());
+            return $res['exit_code'] === 0;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    protected function copyDirectory(string $src, string $dst): void
+    {
+        @mkdir($dst, 0755, true);
+        $items = scandir($src) ?: [];
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            $s = $src . DIRECTORY_SEPARATOR . $item;
+            $d = $dst . DIRECTORY_SEPARATOR . $item;
+            if (is_dir($s)) {
+                $this->copyDirectory($s, $d);
+            } else {
+                @copy($s, $d);
+            }
+        }
+    }
+
+    protected function deleteDirectory(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+        $items = scandir($dir) ?: [];
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            $path = $dir . DIRECTORY_SEPARATOR . $item;
+            if (is_dir($path)) {
+                $this->deleteDirectory($path);
+            } else {
+                @unlink($path);
+            }
+        }
+        @rmdir($dir);
     }
 
     /**
@@ -423,16 +705,16 @@ class MarketplaceService
     }
 
     /**
-     * Find Composer binary.
+     * Find Composer command parts.
      *
-     * @return string
+     * @return array
      */
-    protected function findComposerBinary(): string
+    protected function findComposerCommand(): array
     {
         if (file_exists(base_path('composer.phar'))) {
-            return (PHP_BINARY ?: 'php') . ' ' . base_path('composer.phar');
+            return [PHP_BINARY ?: 'php', base_path('composer.phar')];
         }
 
-        return 'composer';
+        return ['composer'];
     }
 }

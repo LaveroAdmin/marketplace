@@ -120,6 +120,9 @@
         </ul>
 
         <div class="d-flex align-items-center gap-2 flex-wrap flex-sm-nowrap">
+            <button type="button" class="btn btn-sm btn-outline-success text-nowrap" data-bs-toggle="modal" data-bs-target="#modal-upload-zip" title="{{ trans('lavero-admin-marketplace::marketplace.upload_zip_title') }}">
+                <i class="icon-upload me-1"></i> <span class="d-none d-lg-inline">{{ trans('lavero-admin-marketplace::marketplace.upload_zip') }}</span>
+            </button>
             <button type="button" class="btn btn-sm btn-outline-primary text-nowrap" id="btn-refresh-repos" title="{{ trans('lavero-admin-marketplace::marketplace.refresh_repos') }}">
                 <i class="icon-sync-alt me-1"></i> <span class="d-none d-lg-inline">{{ trans('lavero-admin-marketplace::marketplace.refresh_repos') }}</span>
             </button>
@@ -212,6 +215,15 @@
 
                     <div class="d-flex align-items-center gap-1 ms-auto ms-sm-0">
                         @if($ext['installed'])
+                            @if(!empty($ext['has_update']))
+                                <button type="button" class="btn btn-sm btn-warning btn-update text-dark fw-semibold" data-key="{{ $key }}" data-title="{{ $ext['title'] }}" title="{{ trans('lavero-admin-marketplace::marketplace.update_to', ['version' => $ext['latest_version'] ?? '']) }}">
+                                    <i class="icon-arrow-up me-1"></i> {{ trans('lavero-admin-marketplace::marketplace.update_to', ['version' => $ext['latest_version'] ?? '']) }}
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-sm btn-outline-secondary btn-update" data-key="{{ $key }}" data-title="{{ $ext['title'] }}" title="{{ trans('lavero-admin-marketplace::marketplace.update') }}">
+                                    <i class="icon-download"></i>
+                                </button>
+                            @endif
                             <button type="button" class="btn btn-sm btn-outline-info btn-reimport" data-key="{{ $key }}" data-title="{{ $ext['title'] }}" title="{{ trans('lavero-admin-marketplace::marketplace.reimport_tooltip') }}">
                                 <i class="icon-sync-alt me-1"></i> {{ trans('lavero-admin-marketplace::marketplace.reimport') }}
                             </button>
@@ -232,6 +244,33 @@
         </div>
     </div>
     @endforeach
+</div>
+
+<!-- Modal: Upload ZIP Extension -->
+<div class="modal fade" id="modal-upload-zip" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="form-upload-zip" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="icon-upload me-2 text-success"></i>{{ trans('lavero-admin-marketplace::marketplace.upload_zip_title') }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('admin.close') }}"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted mb-3">{{ trans('lavero-admin-marketplace::marketplace.upload_zip_desc') }}</p>
+                    <input type="file" name="archive" id="zip-archive-input" class="form-control" accept=".zip" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('lavero-admin-marketplace::marketplace.btn_cancel') }}</button>
+                    <button type="submit" class="btn btn-success text-white">
+                        <i class="icon-upload me-1"></i>{{ trans('lavero-admin-marketplace::marketplace.upload_zip_btn') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- Modal: Setup Instructions -->
@@ -569,6 +608,18 @@
         });
     });
 
+    // Update Button with confirmation
+    document.querySelectorAll('.btn-update').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const key = this.dataset.key;
+            const title = this.dataset.title || key;
+            const msg = '{{ trans("lavero-admin-marketplace::marketplace.confirm_update") }}'.replace(':name', title);
+            askConfirmation('{{ trans("lavero-admin-marketplace::marketplace.confirm_title") }}', msg, function () {
+                executeAction('update', key);
+            });
+        });
+    });
+
     // Re-import Button with confirmation
     document.querySelectorAll('.btn-reimport').forEach(btn => {
         btn.addEventListener('click', function () {
@@ -795,6 +846,57 @@
             cmdInput.select();
             navigator.clipboard.writeText(cmdInput.value);
             admin.toastr.success('{{ trans("lavero-admin-marketplace::marketplace.copied") }}');
+        });
+    }
+
+    const formUploadZip = document.getElementById('form-upload-zip');
+    if (formUploadZip) {
+        formUploadZip.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('zip-archive-input');
+            if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+                return;
+            }
+
+            const uploadModalEl = document.getElementById('modal-upload-zip');
+            const uploadModal = uploadModalEl ? bootstrap.Modal.getInstance(uploadModalEl) : null;
+            if (uploadModal) uploadModal.hide();
+
+            const formData = new FormData();
+            formData.append('archive', fileInput.files[0]);
+
+            const modalTermEl = document.getElementById('modal-terminal');
+            const modalTerm = modalTermEl ? bootstrap.Modal.getOrCreateInstance(modalTermEl) : null;
+            const termOutput = document.getElementById('terminal-output');
+            const termStatus = document.getElementById('terminal-status');
+            if (termOutput) termOutput.textContent = '{{ trans("lavero-admin-marketplace::marketplace.waiting_output") }}';
+            if (termStatus) termStatus.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ trans("lavero-admin-marketplace::marketplace.executing_command") }}';
+            if (modalTerm) modalTerm.show();
+
+            fetch('{{ route("marketplace-upload") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (termOutput) termOutput.textContent = data.output || data.message || '';
+                if (data.status) {
+                    if (termStatus) termStatus.innerHTML = '<span class="badge bg-success"><i class="icon-check me-1"></i>' + (data.message || 'OK') + '</span>';
+                    admin.toastr.success(data.message || 'OK');
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    if (termStatus) termStatus.innerHTML = '<span class="badge bg-danger"><i class="icon-times me-1"></i>' + (data.message || 'Error') + '</span>';
+                    admin.toastr.error(data.message || 'Error');
+                }
+            })
+            .catch(err => {
+                if (termStatus) termStatus.innerHTML = '<span class="badge bg-danger">Error</span>';
+                if (termOutput) termOutput.textContent = String(err);
+            });
         });
     }
 })();

@@ -57,4 +57,28 @@ class MarketplaceController extends Controller
             'count'   => count($extensions),
         ]);
     }
+
+    public function upload(Request $request, MarketplaceService $service): JsonResponse
+    {
+        if (!$request->hasFile('archive') || !$request->file('archive')->isValid()) {
+            return response()->json([
+                'status'  => false,
+                'message' => trans('lavero-admin-marketplace::marketplace.upload_invalid_file'),
+                'output'  => '',
+            ], 422);
+        }
+
+        $file = $request->file('archive');
+        if (strtolower((string) $file->getClientOriginalExtension()) !== 'zip') {
+            return response()->json([
+                'status'  => false,
+                'message' => trans('lavero-admin-marketplace::marketplace.upload_invalid_file'),
+                'output'  => '',
+            ], 422);
+        }
+
+        $result = $service->installFromZipFile($file->getRealPath());
+
+        return response()->json($result, $result['status'] ? 200 : 422);
+    }
 }

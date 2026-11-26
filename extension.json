@@ -10,7 +10,7 @@
     },
     "category": "system",
     "icon": "icon-store",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": {
         "name": "Aleksandr Kireev",
         "email": "hello@bespredel.name",
@@ -34,19 +34,21 @@
         "requirements": {
             "en": [
                 "PHP >= 8.1",
-                "Composer binary available in system PATH or composer.phar in project root"
+                "ext-zip (for shared hosting ZIP install/update) or Composer CLI + proc_open"
             ],
             "ru": [
                 "PHP >= 8.1",
-                "Доступный исполняемый файл composer в PATH или composer.phar в корне проекта"
+                "Расширение PHP zip (для установки/обновления без Composer) или Composer CLI + proc_open"
             ]
         },
         "notes": {
             "en": [
-                "Web installation requires process execution permissions (proc_open/exec)."
+                "Supports both Composer CLI (on VPS/local) and pure-PHP ZIP archive installation/updates (on shared hosting without proc_open/exec).",
+                "Extensions installed via ZIP are stored in storage/app/lavero-extensions and loaded automatically on boot; you can also upload .zip archives directly from the Marketplace UI."
             ],
             "ru": [
-                "Для автоматической установки пакетов через веб-интерфейс требуются права на выполнение команд процессами (proc_open/exec)."
+                "Поддерживает как установку/обновление через Composer CLI (на VPS и локально), так и через ZIP-архивы на чистом PHP (для обычного хостинга без proc_open/exec).",
+                "Расширения, установленные через ZIP, сохраняются в storage/app/lavero-extensions и подключаются автоматически; также поддерживается ручная загрузка .zip архивов из интерфейса маркетплейса."
             ]
         }
     },

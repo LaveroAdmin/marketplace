@@ -20,6 +20,7 @@ class Marketplace extends Extension
             /* @var \Illuminate\Routing\Router $router */
             $router->get('marketplace', 'LaveroAdmin\Admin\Marketplace\Http\Controllers\MarketplaceController@index')->name('marketplace-index');
             $router->post('marketplace/run', 'LaveroAdmin\Admin\Marketplace\Http\Controllers\MarketplaceController@runAction')->name('marketplace-run');
+            $router->post('marketplace/upload', 'LaveroAdmin\Admin\Marketplace\Http\Controllers\MarketplaceController@upload')->name('marketplace-upload');
             $router->post('marketplace/refresh', 'LaveroAdmin\Admin\Marketplace\Http\Controllers\MarketplaceController@refresh')->name('marketplace-refresh');
         });
     }

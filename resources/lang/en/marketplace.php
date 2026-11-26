@@ -74,4 +74,11 @@ return [
     'waiting_output' => 'Waiting for output...',
     'cli_run_instruction' => 'Run the following commands in your project root directory:',
     'github' => 'GitHub',
+    'upload_zip' => 'Upload ZIP',
+    'upload_zip_title' => 'Install / Update from ZIP Archive',
+    'upload_zip_desc' => 'Select a LaveroAdmin extension ZIP archive (containing extension.json or composer.json). Works on shared hosting without Composer.',
+    'upload_zip_btn' => 'Install from Archive',
+    'upload_invalid_file' => 'Please select a valid .zip extension archive.',
+    'update_available' => 'Update available',
+    'update_to' => 'Update to :version',
 ];

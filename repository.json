@@ -1,7 +1,7 @@
 {
     "name": "LaveroAdmin Official Repository",
     "version": "1.0.0",
-    "updated_at": "2026-11-24T12:00:00Z",
+    "updated_at": "2026-11-26T05:06:47Z",
     "packages": [
         {
             "name": "laveroadmin/activity-log",
@@ -221,7 +221,7 @@
             },
             "category": "tools",
             "icon": "icon-toggle-on",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "author": {
                 "name": "Aleksandr Kireev",
                 "email": "hello@bespredel.name",
@@ -231,10 +231,17 @@
             "setup": {
                 "commands": [
                     {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create and update the admin_config database table",
+                            "ru": "Создание и обновление таблицы admin_config в базе данных"
+                        }
+                    },
+                    {
                         "cmd": "php artisan admin:import config",
                         "desc": {
-                            "en": "Import settings migrations and admin menu",
-                            "ru": "Импорт миграций и меню конфигураций"
+                            "en": "Import settings menu item and permissions",
+                            "ru": "Импорт пункта меню и прав доступа конфигураций"
                         }
                     }
                 ],
@@ -252,10 +259,12 @@
                 },
                 "notes": {
                     "en": [
-                        "To load stored settings at boot, call: \\LaveroAdmin\\Config\\Config::load() in your AppServiceProvider boot() method."
+                        "To load stored settings into Laravel config at boot, call \\LaveroAdmin\\Admin\\Config\\Config::load() in your AppServiceProvider::boot() method (guarded with Schema::hasTable).",
+                        "Example: if (Schema::hasTable(config('admin.extensions.config.table', 'admin_config'))) { \\LaveroAdmin\\Admin\\Config\\Config::load(); }"
                     ],
                     "ru": [
-                        "Для загрузки сохраненных параметров в рантайм приложения вызовите: \\LaveroAdmin\\Config\\Config::load() в методе boot() вашего AppServiceProvider."
+                        "Для загрузки сохранённых параметров в config() при старте приложения вызовите \\LaveroAdmin\\Admin\\Config\\Config::load() в методе AppServiceProvider::boot() (с проверкой Schema::hasTable).",
+                        "Пример: if (Schema::hasTable(config('admin.extensions.config.table', 'admin_config'))) { \\LaveroAdmin\\Admin\\Config\\Config::load(); }"
                     ]
                 }
             },
@@ -463,7 +472,7 @@
             },
             "category": "system",
             "icon": "icon-store",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "author": {
                 "name": "Aleksandr Kireev",
                 "email": "hello@bespredel.name",
@@ -487,19 +496,21 @@
                 "requirements": {
                     "en": [
                         "PHP >= 8.1",
-                        "Composer binary available in system PATH or composer.phar in project root"
+                        "ext-zip (for shared hosting ZIP install/update) or Composer CLI + proc_open"
                     ],
                     "ru": [
                         "PHP >= 8.1",
-                        "Доступный исполняемый файл composer в PATH или composer.phar в корне проекта"
+                        "Расширение PHP zip (для установки/обновления без Composer) или Composer CLI + proc_open"
                     ]
                 },
                 "notes": {
                     "en": [
-                        "Web installation requires process execution permissions (proc_open/exec)."
+                        "Supports both Composer CLI (on VPS/local) and pure-PHP ZIP archive installation/updates (on shared hosting without proc_open/exec).",
+                        "Extensions installed via ZIP are stored in storage/app/lavero-extensions and loaded automatically on boot; you can also upload .zip archives directly from the Marketplace UI."
                     ],
                     "ru": [
-                        "Для автоматической установки пакетов через веб-интерфейс требуются права на выполнение команд процессами (proc_open/exec)."
+                        "Поддерживает как установку/обновление через Composer CLI (на VPS и локально), так и через ZIP-архивы на чистом PHP (для обычного хостинга без proc_open/exec).",
+                        "Расширения, установленные через ZIP, сохраняются в storage/app/lavero-extensions и подключаются автоматически; также поддерживается ручная загрузка .zip архивов из интерфейса маркетплейса."
                     ]
                 }
             },
@@ -670,7 +681,7 @@
             },
             "category": "system",
             "icon": "icon-bug",
-            "version": "1.0.0",
+            "version": "1.0.1",
             "author": {
                 "name": "Aleksandr Kireev",
                 "email": "hello@bespredel.name",
@@ -680,10 +691,17 @@
             "setup": {
                 "commands": [
                     {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create the laravel_exceptions database table",
+                            "ru": "Создание таблицы laravel_exceptions в базе данных"
+                        }
+                    },
+                    {
                         "cmd": "php artisan admin:import reporter",
                         "desc": {
-                            "en": "Import exception reporting database tables and menu item",
-                            "ru": "Импорт миграций таблицы исключений и меню"
+                            "en": "Import exception reporting menu item and permissions",
+                            "ru": "Импорт пункта меню и прав доступа отчётов об ошибках"
                         }
                     }
                 ],
@@ -861,7 +879,7 @@
             },
             "category": "security",
             "icon": "icon-shield-alt",
-            "version": "1.0.0",
+            "version": "1.0.2",
             "author": {
                 "name": "Aleksandr Kireev",
                 "email": "hello@bespredel.name",
@@ -871,31 +889,51 @@
             "setup": {
                 "commands": [
                     {
+                        "cmd": "php artisan migrate",
+                        "desc": {
+                            "en": "Create WAFU events, blocks, and settings tables",
+                            "ru": "Создание таблиц событий, блокировок и настроек WAFU"
+                        }
+                    },
+                    {
+                        "cmd": "php artisan vendor:publish --tag=wafu-config",
+                        "desc": {
+                            "en": "Publish base WAFU firewall config (config/wafu.php)",
+                            "ru": "Публикация базового конфига фаервола (config/wafu.php)"
+                        }
+                    },
+                    {
                         "cmd": "php artisan admin:import wafu",
                         "desc": {
-                            "en": "Import firewall rule tables and admin menu",
-                            "ru": "Импорт таблиц правил фаервола и меню управления"
+                            "en": "Import firewall menu items and permissions",
+                            "ru": "Импорт пунктов меню и прав доступа фаервола"
                         }
                     }
                 ],
                 "config": {
-                    "file": "config/admin.php",
-                    "code": "'wafu' => [\n    'enable' => true,\n],"
+                    "file": "bootstrap/app.php",
+                    "code": "->withMiddleware(function (Middleware $middleware) {\n    $middleware->web(append: [\n        \\LaveroAdmin\\Admin\\Wafu\\Middleware\\WafuFirewallMiddleware::class,\n    ]);\n})"
                 },
                 "requirements": {
                     "en": [
-                        "PHP >= 8.1"
+                        "PHP >= 8.1",
+                        "bespredel/wafu"
                     ],
                     "ru": [
-                        "PHP >= 8.1"
+                        "PHP >= 8.1",
+                        "bespredel/wafu"
                     ]
                 },
                 "notes": {
                     "en": [
-                        "Attach \\LaveroAdmin\\Admin\\Wafu\\Middleware\\WafuMiddleware to your web route group or globally in bootstrap/app.php."
+                        "Attach \\LaveroAdmin\\Admin\\Wafu\\Middleware\\WafuFirewallMiddleware (or alias 'wafu.firewall') to your web middleware group in bootstrap/app.php.",
+                        "Password fields and CSRF tokens are automatically excluded from WAF inspection and redacted as [REDACTED] in event logs.",
+                        "All WAF settings, IP whitelists, route exclusions, and module rules are managed from Admin -> WAF Firewall -> WAF Settings and cached until changed."
                     ],
                     "ru": [
-                        "Подключите middleware \\LaveroAdmin\\Admin\\Wafu\\Middleware\\WafuMiddleware в группу маршрутов 'web' или глобально в bootstrap/app.php."
+                        "Подключите middleware \\LaveroAdmin\\Admin\\Wafu\\Middleware\\WafuFirewallMiddleware (или алиас 'wafu.firewall') в группу 'web' в bootstrap/app.php.",
+                        "Поля паролей и CSRF-токены автоматически исключаются из проверки WAF и маскируются как [REDACTED] в журнале событий.",
+                        "Все настройки WAF, белые списки IP, исключения маршрутов и правила модулей управляются из админки (WAF Фаервол -> Настройки WAF) и кэшируются до изменения."
                     ]
                 }
             },

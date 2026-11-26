@@ -74,4 +74,11 @@ return [
     'waiting_output' => 'Ожидание вывода...',
     'cli_run_instruction' => 'Выполните следующие команды в корневом каталоге проекта:',
     'github' => 'GitHub',
+    'upload_zip' => 'Загрузить ZIP',
+    'upload_zip_title' => 'Установка / обновление из ZIP-архива',
+    'upload_zip_desc' => 'Выберите ZIP-архив расширения LaveroAdmin (с файлом extension.json или composer.json). Работает на обычном хостинге без Composer.',
+    'upload_zip_btn' => 'Установить из архива',
+    'upload_invalid_file' => 'Выберите корректный .zip файл расширения.',
+    'update_available' => 'Доступно обновление',
+    'update_to' => 'Обновить до :version',
 ];
